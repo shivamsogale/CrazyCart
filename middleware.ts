@@ -2,20 +2,28 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  // Skip middleware for static pages and assets
-  const publicPatterns = [
-    '/_next',
-    '/static',
-    '/api',
-    '/404',
-    '/500',
-    '/favicon.ico',
-    '/manifest.json',
-    '/robots.txt'
-  ]
+// Define static paths that should be ignored by the middleware
+const staticPaths = [
+  '/_next',
+  '/static',
+  '/api',
+  '/404',
+  '/500',
+  '/_error',
+  '/_not-found',
+  '/favicon.ico',
+  '/manifest.json',
+  '/robots.txt'
+]
 
-  if (publicPatterns.some(pattern => request.nextUrl.pathname.startsWith(pattern))) {
+export async function middleware(request: NextRequest) {
+  // Check if the current path should be handled by middleware
+  const shouldHandlePath = !staticPaths.some(path => 
+    request.nextUrl.pathname.startsWith(path)
+  )
+
+  // Return early for static paths
+  if (!shouldHandlePath) {
     return NextResponse.next()
   }
 
@@ -59,13 +67,12 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next
-     * - static files
-     * - api routes
-     * - public files
-     * - error pages
+     * Match all request paths except:
+     * - Static files and assets
+     * - API routes
+     * - Error pages
+     * - System files
      */
-    '/((?!_next|static|api|public|404|500|favicon.ico|manifest.json|robots.txt).*)',
+    '/((?!_next|static|api|public|404|500|_error|_not-found|favicon.ico|manifest.json|robots.txt).*)',
   ],
 } 

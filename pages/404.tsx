@@ -1,7 +1,8 @@
-import Link from 'next/link'
-import { Suspense } from 'react'
+'use client'
 
-function NotFoundContent() {
+import Link from 'next/link'
+
+export default function Custom404() {
   return (
     <div className="container mx-auto px-4 py-16 text-center">
       <h2 className="text-4xl font-bold mb-4">404 - Page Not Found</h2>
@@ -16,13 +17,10 @@ function NotFoundContent() {
   )
 }
 
-export default function Custom404() {
-  return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-16 text-center">Loading...</div>}>
-      <NotFoundContent />
-    </Suspense>
-  )
-}
+// Ensure page is static
+export const dynamic = 'force-static'
 
-// Force static rendering
-export const dynamic = 'force-static' 
+// Disable static optimization to prevent any dynamic features
+export const config = {
+  unstable_runtimeJS: false
+} 
