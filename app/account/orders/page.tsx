@@ -12,13 +12,22 @@ import { SkeletonCard } from "@/components/ui/skeleton-card"
 import { motion } from "framer-motion"
 import { useSearchParams } from "next/navigation"
 
-// Separate component for search params handling
-function OrdersWithSearch() {
+// Component that uses searchParams
+function SearchParamsWrapper() {
   const searchParams = useSearchParams()
+  const params = {
+    search: searchParams.get("search") || "",
+    status: searchParams.get("status") || "all"
+  }
+  return <OrdersContent initialSearch={params.search} initialStatus={params.status} />
+}
+
+// Component that handles orders display
+function OrdersContent({ initialSearch = "", initialStatus = "all" }) {
   const { orders } = useOrderStore()
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "")
-  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all")
+  const [searchTerm, setSearchTerm] = useState(initialSearch)
+  const [statusFilter, setStatusFilter] = useState(initialStatus)
   const [sortBy, setSortBy] = useState("newest")
 
   // Simulate loading
@@ -218,7 +227,7 @@ function OrdersWithSearch() {
   )
 }
 
-// Main component with Suspense
+// Main component with proper Suspense boundaries
 export default function OrdersPage() {
   return (
     <Suspense fallback={
@@ -230,7 +239,7 @@ export default function OrdersPage() {
         </div>
       </div>
     }>
-      <OrdersWithSearch />
+      <SearchParamsWrapper />
     </Suspense>
   )
 } 
