@@ -3,14 +3,19 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Skip middleware for error pages and static files
-  if (request.nextUrl.pathname.startsWith('/_next') || 
-      request.nextUrl.pathname.startsWith('/static') ||
-      request.nextUrl.pathname.startsWith('/api') ||
-      request.nextUrl.pathname === '/404' ||
-      request.nextUrl.pathname === '/500' ||
-      request.nextUrl.pathname === '/_not-found' ||
-      request.nextUrl.pathname === '/favicon.ico') {
+  // Skip middleware for static pages and assets
+  const publicPatterns = [
+    '/_next',
+    '/static',
+    '/api',
+    '/404',
+    '/500',
+    '/favicon.ico',
+    '/manifest.json',
+    '/robots.txt'
+  ]
+
+  if (publicPatterns.some(pattern => request.nextUrl.pathname.startsWith(pattern))) {
     return NextResponse.next()
   }
 
@@ -51,17 +56,16 @@ export async function middleware(request: NextRequest) {
   return response
 }
 
-// Update matcher to be more specific about which routes to handle
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public (public files)
+     * - _next
+     * - static files
+     * - api routes
+     * - public files
+     * - error pages
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public|404|500|_not-found).*)',
+    '/((?!_next|static|api|public|404|500|favicon.ico|manifest.json|robots.txt).*)',
   ],
 } 

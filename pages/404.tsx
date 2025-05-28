@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import { Suspense } from 'react'
 
@@ -18,10 +16,13 @@ function NotFoundContent() {
   )
 }
 
-export default function NotFound() {
+export default function Custom404() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="container mx-auto px-4 py-16 text-center">Loading...</div>}>
       <NotFoundContent />
     </Suspense>
   )
-} 
+}
+
+// Force static rendering
+export const dynamic = 'force-static' 
