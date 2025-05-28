@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import Header from "@/components/layout/header"
+import ClientHeader from "@/components/layout/client-header"
 import Footer from "@/components/layout/footer"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <div className="flex flex-col min-h-screen">
-          <Header />
+          <ClientHeader />
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
