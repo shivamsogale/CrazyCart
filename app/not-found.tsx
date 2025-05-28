@@ -1,22 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { Suspense } from 'react'
 
-export default function NotFound() {
-  useEffect(() => {
-    // Initialize Supabase client on the client side
-    const supabase = createClient()
-    
-    // Get session without blocking render
-    const initializeAuth = async () => {
-      await supabase.auth.getSession()
-    }
-    
-    initializeAuth()
-  }, [])
-
+function NotFoundContent() {
   return (
     <div className="container mx-auto px-4 py-16 text-center">
       <h2 className="text-4xl font-bold mb-4">404 - Page Not Found</h2>
@@ -28,5 +15,13 @@ export default function NotFound() {
         Return Home
       </Link>
     </div>
+  )
+}
+
+export default function NotFound() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NotFoundContent />
+    </Suspense>
   )
 } 
