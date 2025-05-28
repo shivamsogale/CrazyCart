@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useOrderStore } from "@/lib/store/orders"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,12 +10,15 @@ import { Package, Truck, CheckCircle, Search, Filter, ShoppingBag } from "lucide
 import Link from "next/link"
 import { SkeletonCard } from "@/components/ui/skeleton-card"
 import { motion } from "framer-motion"
+import { useSearchParams } from "next/navigation"
 
-export default function OrdersPage() {
+// Separate component for search params handling
+function OrdersWithSearch() {
+  const searchParams = useSearchParams()
   const { orders } = useOrderStore()
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "")
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all")
   const [sortBy, setSortBy] = useState("newest")
 
   // Simulate loading
@@ -212,5 +215,22 @@ export default function OrdersPage() {
         )}
       </div>
     </div>
+  )
+}
+
+// Main component with Suspense
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {[1, 2, 3].map((i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      </div>
+    }>
+      <OrdersWithSearch />
+    </Suspense>
   )
 } 
