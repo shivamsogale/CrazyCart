@@ -11,16 +11,11 @@ import Link from "next/link"
 import { SkeletonCard } from "@/components/ui/skeleton-card"
 import { motion } from "framer-motion"
 
-interface OrdersClientProps {
-  initialSearch: string
-  initialStatus: string
-}
-
-export default function OrdersClient({ initialSearch, initialStatus }: OrdersClientProps) {
+export default function OrdersClient() {
   const { orders } = useOrderStore()
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState(initialSearch)
-  const [statusFilter, setStatusFilter] = useState(initialStatus)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
 
   // Simulate loading
@@ -218,4 +213,4 @@ export default function OrdersClient({ initialSearch, initialStatus }: OrdersCli
       </div>
     </div>
   )
-} 
+}

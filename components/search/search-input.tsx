@@ -1,31 +1,24 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
-import { useCallback, useTransition } from "react"
-import { Button } from "@/components/ui/button"
+import { useCallback, useState } from "react"
 
 export default function SearchInput() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
+  const [searchTerm, setSearchTerm] = useState("")
 
   const handleSearch = useCallback(
     (term: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      
+      setSearchTerm(term)
+      const params = new URLSearchParams()
       if (term) {
         params.set("q", term)
-      } else {
-        params.delete("q")
       }
-
-      startTransition(() => {
-        router.push(`/products?${params.toString()}`)
-      })
+      router.push(`/products?${params.toString()}`)
     },
-    [router, searchParams]
+    [router]
   )
 
   return (
@@ -35,9 +28,9 @@ export default function SearchInput() {
         type="search"
         placeholder="Search products..."
         className="pl-10 w-full"
-        defaultValue={searchParams.get("q") || ""}
+        value={searchTerm}
         onChange={(e) => handleSearch(e.target.value)}
       />
     </div>
   )
-} 
+}
