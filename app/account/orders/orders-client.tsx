@@ -12,13 +12,18 @@ import { SkeletonCard } from "@/components/ui/skeleton-card"
 import { motion } from "framer-motion"
 import { useSearchParams } from "next/navigation"
 
-// Separate component for search params
-function SearchParamsWrapper({ children }: { children: (params: { search: string, status: string }) => React.ReactNode }) {
+// Component that safely uses searchParams
+function SearchParamsReader() {
   const searchParams = useSearchParams()
-  return children({
-    search: searchParams.get("search") || "",
-    status: searchParams.get("status") || "all"
-  })
+  const search = searchParams?.get("search") ?? ""
+  const status = searchParams?.get("status") ?? "all"
+  
+  return (
+    <OrdersContent 
+      searchTerm={search}
+      statusFilter={status}
+    />
+  )
 }
 
 // Main content component that doesn't directly use searchParams
@@ -229,23 +234,18 @@ function OrdersContent({ searchTerm: initialSearch, statusFilter: initialStatus 
 // Export the wrapped component
 export default function OrdersClient() {
   return (
-    <Suspense fallback={
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {[1, 2, 3].map((i) => (
-            <SkeletonCard key={i} />
-          ))}
+    <Suspense 
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto space-y-6">
+            {[1, 2, 3].map((i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
         </div>
-      </div>
-    }>
-      <SearchParamsWrapper>
-        {(params) => (
-          <OrdersContent 
-            searchTerm={params.search}
-            statusFilter={params.status}
-          />
-        )}
-      </SearchParamsWrapper>
+      }
+    >
+      <SearchParamsReader />
     </Suspense>
   )
 } 
