@@ -10,14 +10,17 @@ import { Package, Truck, CheckCircle, Search, ShoppingBag } from "lucide-react"
 import Link from "next/link"
 import { SkeletonCard } from "@/components/ui/skeleton-card"
 import { motion } from "framer-motion"
-import { useRouter } from "next/navigation"
 
-export default function OrdersClient() {
-  const router = useRouter()
+interface OrdersClientProps {
+  initialSearch: string
+  initialStatus: string
+}
+
+export default function OrdersClient({ initialSearch, initialStatus }: OrdersClientProps) {
   const { orders } = useOrderStore()
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [searchTerm, setSearchTerm] = useState(initialSearch)
+  const [statusFilter, setStatusFilter] = useState(initialStatus)
   const [sortBy, setSortBy] = useState("newest")
 
   // Simulate loading
@@ -25,16 +28,6 @@ export default function OrdersClient() {
     const timer = setTimeout(() => setLoading(false), 1000)
     return () => clearTimeout(timer)
   }, [])
-
-  // Update URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams()
-    if (searchTerm) params.set("search", searchTerm)
-    if (statusFilter !== "all") params.set("status", statusFilter)
-    
-    const newUrl = `/account/orders${params.toString() ? `?${params.toString()}` : ""}`
-    router.push(newUrl, { scroll: false })
-  }, [searchTerm, statusFilter, router])
 
   const getStatusIcon = (status: string) => {
     switch (status) {
