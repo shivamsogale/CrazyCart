@@ -1,85 +1,171 @@
-import { isAdmin } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
+
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { createClient } from "@/lib/supabase/server"
-import { formatCurrency } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import ProductForm from "@/components/admin/product-form"
+import type { Product } from "@/lib/supabase/types"
+import { Edit, Trash2, Plus } from "lucide-react"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
 
-export default async function AdminPage() {
-  const adminCheck = await isAdmin()
+export default function AdminPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [showForm, setShowForm] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const supabase = createClient()
+  const router = useRouter()
 
-  if (!adminCheck) {
-    redirect("/")
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push("/auth")
+        return
+      }
+
+      const { data: profile } = await supabase.from("user_profiles").select("is_admin").eq("id", user.id).single()
+
+      if (!profile?.is_admin) {
+        router.push("/")
+        return
+      }
+
+      setIsAdmin(true)
+      loadProducts()
+    }
+
+    checkAdmin()
+  }, [supabase, router])
+
+  const loadProducts = async () => {
+    const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false })
+
+    setProducts(data || [])
+    setLoading(false)
   }
 
-  const supabase = await createClient()
+  const deleteProduct = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this product?")) return
 
-  const [{ count: productsCount }, { count: ordersCount }, { data: recentOrders }] = await Promise.all([
-    supabase.from("products").select("*", { count: "exact", head: true }),
-    supabase.from("orders").select("*", { count: "exact", head: true }),
-    supabase.from("orders").select("*, profiles(full_name)").order("created_at", { ascending: false }).limit(5),
-  ])
+    const { error } = await supabase.from("products").delete().eq("id", id)
+
+    if (error) {
+      toast.error("Failed to delete product")
+      return
+    }
+
+    toast.success("Product deleted successfully")
+    loadProducts()
+  }
+
+  const handleFormSuccess = () => {
+    setShowForm(false)
+    setEditingProduct(null)
+    loadProducts()
+  }
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8">Loading...</div>
+  }
+
+  if (!isAdmin) {
+    return <div className="container mx-auto px-4 py-8">Access denied</div>
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Products</CardTitle>
-            <CardDescription>Total products in store</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <span className="text-3xl font-bold">{productsCount}</span>
-              <Button asChild variant="outline">
-                <Link href="/admin/products">Manage Products</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Orders</CardTitle>
-            <CardDescription>Total orders received</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <span className="text-3xl font-bold">{ordersCount}</span>
-              <Button asChild variant="outline">
-                <Link href="/admin/orders">View Orders</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <Button onClick={() => setShowForm(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Product
+        </Button>
       </div>
+
+      {showForm && (
+        <div className="mb-8">
+          <ProductForm product={editingProduct || undefined} onSuccess={handleFormSuccess} />
+          <Button
+            variant="outline"
+            onClick={() => {
+              setShowForm(false)
+              setEditingProduct(null)
+            }}
+            className="mt-4"
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
+          <CardTitle>Products</CardTitle>
         </CardHeader>
         <CardContent>
-          {recentOrders && recentOrders.length > 0 ? (
-            <div className="space-y-4">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="flex justify-between items-center border-b pb-2">
-                  <div>
-                    <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
-                    <p className="text-sm text-muted-foreground">{order.profiles?.full_name || "Unknown Customer"}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{formatCurrency(order.total_amount)}</p>
-                    <p className="text-sm text-muted-foreground">{order.status}</p>
-                  </div>
-                </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Image</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Stock</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell>
+                    <div className="w-12 h-12 relative">
+                      <Image
+                        src={product.image_url || "/placeholder.svg?height=48&width=48"}
+                        alt={product.name}
+                        fill
+                        className="object-cover rounded"
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>₹{product.price.toFixed(2)}</TableCell>
+                  <TableCell>{product.stock_quantity}</TableCell>
+                  <TableCell>
+                    <Badge variant={product.is_active ? "default" : "secondary"}>
+                      {product.is_active ? "Active" : "Inactive"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          setEditingProduct(product)
+                          setShowForm(true)
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon" onClick={() => deleteProduct(product.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
               ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">No recent orders</p>
-          )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

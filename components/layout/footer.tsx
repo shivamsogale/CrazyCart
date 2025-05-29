@@ -1,141 +1,127 @@
-"use client"
-
 import Link from "next/link"
-import { Input } from "@/components/ui/input"
+import { Facebook, Twitter, Instagram, Mail, Phone, MapPin, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Twitter, Instagram, Linkedin, Youtube, Mail, Github } from "lucide-react"
+import { Input } from "@/components/ui/input"
 
 export default function Footer() {
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // In a real app, this would submit to an API
-    alert("Thank you for subscribing to our newsletter!")
-  }
-
   return (
-    <footer className="bg-gray-50 border-t">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+
+      <div className="container mx-auto px-4 py-16 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Company Info */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold">CrazyCart</h3>
-            <p className="text-sm text-gray-600">
-              Your one-stop destination for premium electronics, home goods, and lifestyle products.
-            </p>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-2xl font-bold gradient-text mb-4">ShopNext</h3>
+              <p className="text-gray-300 leading-relaxed">
+                Redefining e-commerce with innovative products and exceptional experiences. Your journey to
+                extraordinary begins here.
+              </p>
+            </div>
             <div className="flex space-x-4">
-              <Link href="#" className="text-gray-400 hover:text-gray-500">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-gray-500">
-                <Instagram className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-gray-500">
-                <Linkedin className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-gray-500">
-                <Youtube className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-gray-500">
-                <Github className="h-5 w-5" />
-              </Link>
+              {[Facebook, Twitter, Instagram].map((Icon, index) => (
+                <Link key={index} href="#" className="group">
+                  <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-purple-600 transition-all duration-300 group-hover:scale-110">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/products" className="text-sm text-gray-600 hover:text-gray-900">
-                  All Products
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-sm text-gray-600 hover:text-gray-900">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-sm text-gray-600 hover:text-gray-900">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="text-sm text-gray-600 hover:text-gray-900">
-                  FAQ
-                </Link>
-              </li>
+            <h4 className="text-lg font-semibold mb-6 text-white">Quick Links</h4>
+            <ul className="space-y-3">
+              {[
+                { name: "Home", href: "/" },
+                { name: "Products", href: "/products" },
+                { name: "Cart", href: "/cart" },
+                { name: "Orders", href: "/orders" },
+              ].map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group"
+                  >
+                    <ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Customer Service */}
+          {/* Categories */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Customer Service</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/shipping" className="text-sm text-gray-600 hover:text-gray-900">
-                  Shipping Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/returns" className="text-sm text-gray-600 hover:text-gray-900">
-                  Returns & Refunds
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-sm text-gray-600 hover:text-gray-900">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-sm text-gray-600 hover:text-gray-900">
-                  Terms of Service
-                </Link>
-              </li>
+            <h4 className="text-lg font-semibold mb-6 text-white">Categories</h4>
+            <ul className="space-y-3">
+              {["Electronics", "Sports", "Home & Kitchen", "Accessories"].map((category) => (
+                <li key={category}>
+                  <Link
+                    href={`/products?category=${encodeURIComponent(category)}`}
+                    className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group"
+                  >
+                    <ArrowRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {category}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Newsletter */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Newsletter</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Subscribe to our newsletter for updates, offers, and more.
-            </p>
-            <form onSubmit={handleNewsletterSubmit} className="space-y-2">
+            <h4 className="text-lg font-semibold mb-6 text-white">Stay Updated</h4>
+            <p className="text-gray-300 mb-4 text-sm">Subscribe to get special offers and updates.</p>
+            <div className="space-y-3">
               <Input
                 type="email"
-                placeholder="Enter your email"
-                className="w-full"
-                required
+                placeholder="Your email address"
+                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400"
               />
-              <Button type="submit" className="w-full">
-                <Mail className="mr-2 h-4 w-4" />
+              <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300">
                 Subscribe
               </Button>
-            </form>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Info */}
+        <div className="border-t border-white/10 mt-12 pt-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {[
+              { icon: MapPin, text: "123 Innovation Street, Tech City, TC 12345" },
+              { icon: Phone, text: "+1 (555) 123-4567" },
+              { icon: Mail, text: "hello@shopnext.com" },
+            ].map((contact, index) => (
+              <div key={index} className="flex items-center space-x-3 text-gray-300">
+                <contact.icon className="h-5 w-5 text-purple-400" />
+                <span className="text-sm">{contact.text}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-8 pt-8 border-t border-gray-200">
+        <div className="border-t border-white/10 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-sm text-gray-600">
-              © {new Date().getFullYear()} CrazyCart. All rights reserved.
-            </p>
+            <p className="text-gray-400 text-sm">© 2024 ShopNext. Crafted with ❤️ for amazing shopping experiences.</p>
             <div className="flex space-x-6">
-              <Link href="/privacy" className="text-sm text-gray-600 hover:text-gray-900">
-                Privacy
-              </Link>
-              <Link href="/terms" className="text-sm text-gray-600 hover:text-gray-900">
-                Terms
-              </Link>
-              <Link href="/sitemap" className="text-sm text-gray-600 hover:text-gray-900">
-                Sitemap
-              </Link>
+              {["Privacy Policy", "Terms of Service", "Return Policy"].map((link) => (
+                <Link
+                  key={link}
+                  href="#"
+                  className="text-gray-400 hover:text-white text-sm transition-colors duration-300"
+                >
+                  {link}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
       </div>
     </footer>
   )
-} 
+}

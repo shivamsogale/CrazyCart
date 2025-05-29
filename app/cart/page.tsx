@@ -1,151 +1,212 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Minus, Plus, Trash2 } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
-import CartItemActions from "@/components/cart/cart-item-actions"
-import { formatCurrency } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
-import { ShoppingBag } from "lucide-react"
-import { getCartItems } from "@/lib/cart"
-import type { CartItem } from "@/lib/types"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+
+interface CartItemWithProduct {
+  id: string
+  quantity: number
+  product: {
+    id: string
+    name: string
+    price: number
+    image_url: string | null
+  }
+}
 
 export default function CartPage() {
+  const [cartItems, setCartItems] = useState<CartItemWithProduct[]>([])
   const [loading, setLoading] = useState(true)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [user, setUser] = useState<any>(null)
+  const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
-    const fetchCartItems = async () => {
-      try {
-        const items = await getCartItems()
-        setCartItems(items || [])
-      } catch (error) {
-        console.error("Error fetching cart items:", error)
-      } finally {
-        setLoading(false)
+    const getCartItems = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push("/auth")
+        return
       }
+
+      setUser(user)
+
+      const { data: items } = await supabase
+        .from("cart_items")
+        .select(`
+          id,
+          quantity,
+          product:products(id, name, price, image_url)
+        `)
+        .eq("user_id", user.id)
+
+      setCartItems(items || [])
+      setLoading(false)
     }
 
-    fetchCartItems()
-  }, [])
+    getCartItems()
+  }, [supabase, router])
 
-  const total = cartItems.reduce((sum, item) => {
-    return sum + (item.product?.price || 0) * item.quantity
-  }, 0)
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
+    if (newQuantity === 0) {
+      await removeItem(itemId)
+      return
+    }
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 w-48 bg-gray-200 rounded mb-8"></div>
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-gray-100 h-32 rounded-lg"></div>
-              ))}
-            </div>
-            <div className="h-64 bg-gray-100 rounded-lg"></div>
-          </div>
-        </div>
-      </div>
-    )
+    const { error } = await supabase.from("cart_items").update({ quantity: newQuantity }).eq("id", itemId)
+
+    if (error) {
+      toast.error("Failed to update quantity")
+      return
+    }
+
+    setCartItems((items) => items.map((item) => (item.id === itemId ? { ...item, quantity: newQuantity } : item)))
   }
 
-  if (cartItems.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-12"
-        >
-          <div className="bg-gray-50 p-8 rounded-lg">
-            <ShoppingBag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
-            <p className="text-muted-foreground mb-8">Add some products to get started!</p>
-            <Button asChild>
-              <Link href="/products">Continue Shopping</Link>
-            </Button>
-          </div>
-        </motion.div>
-      </div>
-    )
+  const removeItem = async (itemId: string) => {
+    const { error } = await supabase.from("cart_items").delete().eq("id", itemId)
+
+    if (error) {
+      toast.error("Failed to remove item")
+      return
+    }
+
+    setCartItems((items) => items.filter((item) => item.id !== itemId))
+    toast.success("Item removed from cart")
+  }
+
+  const checkout = async () => {
+    if (!user || cartItems.length === 0) return
+
+    try {
+      const totalAmount = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+
+      // Create order
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          total_amount: totalAmount,
+          status: "pending",
+        })
+        .select()
+        .single()
+
+      if (orderError) throw orderError
+
+      // Create order items
+      const orderItems = cartItems.map((item) => ({
+        order_id: order.id,
+        product_id: item.product.id,
+        quantity: item.quantity,
+        price: item.product.price,
+      }))
+
+      const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
+
+      if (itemsError) throw itemsError
+
+      // Clear cart
+      const { error: clearError } = await supabase.from("cart_items").delete().eq("user_id", user.id)
+
+      if (clearError) throw clearError
+
+      toast.success("Order placed successfully!")
+      router.push("/orders")
+    } catch (error: any) {
+      toast.error("Failed to place order")
+    }
+  }
+
+  const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8">Loading...</div>
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-4">
-          <AnimatePresence mode="popLayout">
+      {cartItems.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 mb-4">Your cart is empty</p>
+          <Button onClick={() => router.push("/products")}>Continue Shopping</Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
             {cartItems.map((item) => (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="bg-white rounded-lg shadow-sm"
-              >
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-20 h-20 relative">
-                        <Image
-                          src={item.product?.image_url || "/placeholder.svg?height=80&width=80"}
-                          alt={item.product?.name || "Product"}
-                          fill
-                          className="object-cover rounded"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{item.product?.name}</h3>
-                        <p className="text-muted-foreground">{formatCurrency(item.product?.price || 0)}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <CartItemActions item={item} />
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{formatCurrency((item.product?.price || 0) * item.quantity)}</p>
-                      </div>
+              <Card key={item.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-20 h-20 relative">
+                      <Image
+                        src={item.product.image_url || "/placeholder.svg?height=80&width=80"}
+                        alt={item.product.name}
+                        fill
+                        className="object-cover rounded"
+                      />
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{item.product.name}</h3>
+                      <p className="text-gray-600">${item.product.price.toFixed(2)}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="outline" size="icon" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="w-8 text-center">{item.quantity}</span>
+                      <Button variant="outline" size="icon" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Button variant="outline" size="icon" onClick={() => removeItem(item.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-          </AnimatePresence>
-        </div>
+          </div>
 
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>{formatCurrency(total)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>Free</span>
-              </div>
-              <div className="border-t pt-4">
-                <div className="flex justify-between font-semibold text-lg">
-                  <span>Total</span>
-                  <span>{formatCurrency(total)}</span>
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>₹{total.toFixed(2)}</span>
                 </div>
-              </div>
-              <Button className="w-full" asChild>
-                <Link href="/checkout">Proceed to Checkout</Link>
-              </Button>
-            </CardContent>
-          </Card>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>Free</span>
+                </div>
+                <div className="border-t pt-4">
+                  <div className="flex justify-between font-bold">
+                    <span>Total</span>
+                    <span>₹{total.toFixed(2)}</span>
+                  </div>
+                </div>
+                <Button onClick={checkout} className="w-full">
+                  Checkout
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

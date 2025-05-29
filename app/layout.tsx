@@ -2,15 +2,16 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import ClientHeader from "@/components/layout/client-header"
+import Header from "@/components/layout/header"
+import { Toaster } from "sonner"
 import Footer from "@/components/layout/footer"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "CrazyCart - Your Premium Shopping Destination",
-  description: "Shop the latest electronics, home goods, and lifestyle products.",
-  generator: 'v0.dev'
+  title: "ShopNext - Premium E-commerce Experience",
+  description: "Discover extraordinary products with ShopNext - where innovation meets elegance in online shopping",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -21,11 +22,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex flex-col min-h-screen">
-          <ClientHeader />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <Header />
+        <main className="pt-20">{children}</main>
+        <Footer />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(10px)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+            },
+          }}
+        />
       </body>
     </html>
   )
