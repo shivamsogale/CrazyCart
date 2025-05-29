@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import OrdersClient from "./orders-client"
 
 interface SearchParams {
@@ -11,9 +12,11 @@ export default function OrdersPage({
   searchParams: SearchParams
 }) {
   return (
-    <OrdersClient 
-      initialSearch={searchParams.search || ""}
-      initialStatus={searchParams.status || "all"}
-    />
+    <Suspense fallback={<div>Loading...</div>}>
+      <OrdersClient 
+        initialSearch={searchParams.search || ""}
+        initialStatus={searchParams.status || "all"}
+      />
+    </Suspense>
   )
-} 
+}
