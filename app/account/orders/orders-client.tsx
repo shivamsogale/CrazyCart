@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect } from "react"
 import { useOrderStore } from "@/lib/store/orders"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,28 +10,14 @@ import { Package, Truck, CheckCircle, Search, ShoppingBag } from "lucide-react"
 import Link from "next/link"
 import { SkeletonCard } from "@/components/ui/skeleton-card"
 import { motion } from "framer-motion"
-import { useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 
-// Component that safely uses searchParams
-function SearchParamsReader() {
-  const searchParams = useSearchParams()
-  const search = searchParams?.get("search") ?? ""
-  const status = searchParams?.get("status") ?? "all"
-  
-  return (
-    <OrdersContent 
-      searchTerm={search}
-      statusFilter={status}
-    />
-  )
-}
-
-// Main content component that doesn't directly use searchParams
-function OrdersContent({ searchTerm: initialSearch, statusFilter: initialStatus }: { searchTerm: string, statusFilter: string }) {
+export default function OrdersClient() {
+  const router = useRouter()
   const { orders } = useOrderStore()
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState(initialSearch)
-  const [statusFilter, setStatusFilter] = useState(initialStatus)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("newest")
 
   // Simulate loading
@@ -39,6 +25,16 @@ function OrdersContent({ searchTerm: initialSearch, statusFilter: initialStatus 
     const timer = setTimeout(() => setLoading(false), 1000)
     return () => clearTimeout(timer)
   }, [])
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (searchTerm) params.set("search", searchTerm)
+    if (statusFilter !== "all") params.set("status", statusFilter)
+    
+    const newUrl = `/account/orders${params.toString() ? `?${params.toString()}` : ""}`
+    router.push(newUrl, { scroll: false })
+  }, [searchTerm, statusFilter, router])
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -228,24 +224,5 @@ function OrdersContent({ searchTerm: initialSearch, statusFilter: initialStatus 
         )}
       </div>
     </div>
-  )
-}
-
-// Export the wrapped component
-export default function OrdersClient() {
-  return (
-    <Suspense 
-      fallback={
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto space-y-6">
-            {[1, 2, 3].map((i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        </div>
-      }
-    >
-      <SearchParamsReader />
-    </Suspense>
   )
 } 
