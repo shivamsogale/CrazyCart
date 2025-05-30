@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Facebook, Twitter, Instagram, Mail, Phone, MapPin, ArrowRight } from "lucide-react"
+import { Github, Instagram, Mail, Phone, MapPin, ArrowRight, Linkedin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -13,17 +13,21 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-2xl font-bold gradient-text mb-4">ShopNext</h3>
+              <h3 className="text-2xl font-bold gradient-text mb-4">CrazyCart</h3>
               <p className="text-gray-300 leading-relaxed">
                 Redefining e-commerce with innovative products and exceptional experiences. Your journey to
                 extraordinary begins here.
               </p>
             </div>
             <div className="flex space-x-4">
-              {[Facebook, Twitter, Instagram].map((Icon, index) => (
-                <Link key={index} href="#" className="group">
+              {[
+                { Icon: Github, href: "https://github.com/shivamsogale" },
+                { Icon: Instagram, href: "https://www.instagram.com/_shivam_sogale_/" },
+                { Icon: Linkedin, href: "https://www.linkedin.com/in/shivam-sogale-a54904321/" }
+              ].map((social, index) => (
+                <Link key={index} href={social.href} target="_blank" rel="noopener noreferrer" className="group">
                   <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-purple-600 transition-all duration-300 group-hover:scale-110">
-                    <Icon className="h-5 w-5" />
+                    <social.Icon className="h-5 w-5" />
                   </div>
                 </Link>
               ))}
@@ -92,9 +96,9 @@ export default function Footer() {
         <div className="border-t border-white/10 mt-12 pt-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {[
-              { icon: MapPin, text: "123 Innovation Street, Tech City, TC 12345" },
-              { icon: Phone, text: "+1 (555) 123-4567" },
-              { icon: Mail, text: "hello@shopnext.com" },
+              { icon: MapPin, text: "Mumbai, Maharashtra, India" },
+              { icon: Phone, text: "+917448234341" },
+              { icon: Mail, text: "crazycart@gmail.com" },
             ].map((contact, index) => (
               <div key={index} className="flex items-center space-x-3 text-gray-300">
                 <contact.icon className="h-5 w-5 text-purple-400" />
@@ -109,13 +113,17 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">© 2024 CrazyCart. Crafted with ❤️ for amazing shopping experiences.</p>
             <div className="flex space-x-6">
-              {["Privacy Policy", "Terms of Service", "Return Policy"].map((link) => (
+              {[
+                { name: "Privacy Policy", href: "/policies/privacy" },
+                { name: "Terms of Service", href: "/policies/terms" },
+                { name: "Return Policy", href: "/policies/returns" }
+              ].map((link) => (
                 <Link
-                  key={link}
-                  href="#"
+                  key={link.name}
+                  href={link.href}
                   className="text-gray-400 hover:text-white text-sm transition-colors duration-300"
                 >
-                  {link}
+                  {link.name}
                 </Link>
               ))}
             </div>

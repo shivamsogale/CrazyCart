@@ -69,7 +69,7 @@ export default async function HomePage() {
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16 fade-in-up">
-              <h2 className="text-4xl font-bold mb-4 gradient-text">Why Choose ShopNext?</h2>
+              <h2 className="text-4xl font-bold mb-4 gradient-text">Why Choose CrazyCart?</h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 Experience shopping reimagined with our commitment to quality, speed, and exceptional service.
               </p>
@@ -134,28 +134,6 @@ export default async function HomePage() {
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Newsletter Section */}
-        <section className="py-20 bg-gradient-to-r from-purple-600 to-pink-600">
-          <div className="container mx-auto px-4 text-center">
-            <div className="max-w-2xl mx-auto fade-in-up">
-              <h2 className="text-4xl font-bold text-white mb-4">Stay in the Loop</h2>
-              <p className="text-xl text-purple-100 mb-8">
-                Get exclusive access to new arrivals, special offers, and insider updates.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-6 py-3 rounded-full border-0 focus:ring-2 focus:ring-white focus:outline-none"
-                />
-                <Button className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">
-                  Subscribe
-                </Button>
-              </div>
             </div>
           </div>
         </section>

@@ -199,8 +199,8 @@ export default function CartPage() {
                     <span>₹{total.toFixed(2)}</span>
                   </div>
                 </div>
-                <Button onClick={checkout} className="w-full">
-                  Checkout
+                <Button onClick={() => router.push("/checkout")} className="w-full">
+                  Proceed to Checkout
                 </Button>
               </CardContent>
             </Card>
