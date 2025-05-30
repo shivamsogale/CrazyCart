@@ -107,7 +107,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-gray-400 text-sm">© 2024 ShopNext. Crafted with ❤️ for amazing shopping experiences.</p>
+            <p className="text-gray-400 text-sm">© 2024 CrazyCart. Crafted with ❤️ for amazing shopping experiences.</p>
             <div className="flex space-x-6">
               {["Privacy Policy", "Terms of Service", "Return Policy"].map((link) => (
                 <Link

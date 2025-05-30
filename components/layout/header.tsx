@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
+import Image from "next/image"
 
 export default function Header() {
   const [user, setUser] = useState<any>(null)
@@ -80,8 +81,9 @@ export default function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold gradient-text hover:scale-105 transition-transform">
-            ShopNext
+          <Link href="/" className="flex items-center space-x-2 text-2xl font-bold gradient-text hover:scale-105 transition-transform">
+            <Image src="/CrazyCart.png" alt="CrazyCart Logo" width={40} height={40} className="rounded-full" />
+            <span>CrazyCart</span>
           </Link>
 
           {/* Desktop Search */}

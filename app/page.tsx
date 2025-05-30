@@ -26,10 +26,8 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="container mx-auto px-4 text-center relative z-10">
             <div className="max-w-4xl mx-auto fade-in-up">
-              <h1 className="text-6xl md:text-8xl font-bold mb-8 gradient-text leading-tight">
-                Shop the
-                <br />
-                <span className="floating-animation inline-block">Future</span>
+              <h1 className="text-6xl md:text-8xl font-bold mb-8 gradient-text leading-tight whitespace-nowrap">
+                Shop Now
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
                 Discover extraordinary products that blend innovation with elegance. Your perfect purchase awaits.

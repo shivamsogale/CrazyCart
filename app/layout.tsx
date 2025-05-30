@@ -9,9 +9,28 @@ import Footer from "@/components/layout/footer"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ShopNext - Premium E-commerce Experience",
-  description: "Discover extraordinary products with ShopNext - where innovation meets elegance in online shopping",
-    generator: 'v0.dev'
+  title: "CrazyCart - Your Ultimate Shopping Destination",
+  description: "Discover extraordinary products with CrazyCart - where innovation meets elegance in online shopping",
+  generator: 'v0.dev',
+  icons: {
+    icon: [
+      {
+        url: '/CrazyCart.png',
+        sizes: '32x32',
+        type: 'image/png'
+      },
+      {
+        url: '/CrazyCart.png',
+        sizes: '16x16',
+        type: 'image/png'
+      }
+    ],
+    apple: {
+      url: '/CrazyCart.png',
+      sizes: '180x180',
+      type: 'image/png'
+    }
+  }
 }
 
 export default function RootLayout({
